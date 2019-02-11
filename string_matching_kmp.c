@@ -3,10 +3,41 @@
 int string_matching_kmp(char *text, int N, char* pattern, int M){
 	int count = 0;
 	int *overlap_list = overlap_array(pattern, M);
-	printf("overlap function: ");
-	print_array(overlap_list,M);
-	
+	//printf("overlap function: ");
+	//print_array(overlap_list,M);
+
 	//TODO - implement kmp search
+	int i = 0;
+	int j = 0;
+
+	while (i < N) {
+		if (*(text + i) == *(pattern + j)){
+			i = i + 1;
+			j = j + 1;
+			if (j == M){
+				count = count + 1;
+				//printf("match at %d", i - j);
+				j = *(overlap_list + M - 1);
+			}
+		}
+		else {
+			if (j == 0) {
+				i = i + 1;
+			}
+			else {
+				j = *(overlap_list + j - 1);
+			}
+		}
+		/*else {
+			if (j == 0) {
+				j = *(overlap_list + j - 1);
+			}
+			else {
+				i = i + 1;
+			}
+		}*/
+	}
+
 	free(overlap_list);
 	return count;
 }
@@ -20,35 +51,38 @@ int string_matching_kmp(char *text, int N, char* pattern, int M){
     parameters - pattern: string to be preprocessed, M: pattern length
     return: an array with the values of an overlap function for each pattern position
  */
-int * overlap_array(char* pattern, int M){
-	int *ol_list = calloc(M, sizeof(int));    
 
-    int pos = 1;  // first is always zero
-    while (pos < M){
-        int ol_prev = ol_list[pos - 1];
+ int * overlap_array(char* pattern, int M){
+ 	int *ol_list = calloc(M, sizeof(int));
 
-        if (pattern[pos] == pattern[ol_prev])
-            ol_list[pos] = ol_prev + 1;
-        else {
-            int found = 0;
-            int j = ol_prev;
-            int curr_overlap = ol_prev;
-            while (!found && j >= 1){
-                if (pattern[pos] == pattern[j]){
-                    found = 1;
-                    ol_list[pos] = curr_overlap + 1;
-				}
-                else {// try extend a smaller prefix - based on pattern [ol[pos-1]]
-                    curr_overlap = ol_list[j-1];
-                    j = ol_list[j-1];
-				}
-			}
-            if (!found) { // compare with the first
-                if (pattern[pos] == pattern[0])
-                    ol_list[pos] = 1;
-			}
-		}
-        pos++;
-	}
-    return ol_list;
-}
+     int pos = 1;  // first is always zero
+     while (pos < M){
+         int ol_prev = ol_list[pos - 1];
+
+         if (pattern[pos] == pattern[ol_prev]){
+             ol_list[pos] = ol_prev + 1;
+		 }
+         else {
+             int found = 0;
+             int j = ol_prev;
+             int curr_overlap = ol_prev;
+             while (!found && j >= 1){
+                 if (pattern[pos] == pattern[j]){
+                     found = 1;
+                     ol_list[pos] = curr_overlap + 1;
+ 				}
+                 else {// try extend a smaller prefix - based on pattern [ol[pos-1]]
+                     curr_overlap = ol_list[j-1];
+                     j = ol_list[j-1];
+ 				}
+ 			}
+             if (!found) { // compare with the first
+                 if (pattern[pos] == pattern[0]) {
+                     ol_list[pos] = 1;
+				 }
+ 			}
+ 		}
+         pos++;
+ 	}
+     return ol_list;
+ }
